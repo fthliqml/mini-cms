@@ -30,6 +30,8 @@ class CategoryController extends Controller
      */
     public function store(StoreCategoryRequest $request)
     {
+        $this->authorize("create", Category::class);
+
         $validated = $request->validated();
 
         $category = Category::create([
@@ -63,6 +65,8 @@ class CategoryController extends Controller
      */
     public function update(UpdateCategoryRequest $request, Category $category)
     {
+        $this->authorize("update", $category);
+
         $validated = $request->validated();
 
         if (isset($validated["name"])) {
@@ -82,9 +86,11 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
+        $this->authorize("delete", $category);
+
         if ($category->posts()->exists()) {
             return ApiResponse::error(
-                "Cannot delete category because it has associated posts.",
+                "Category cannot be deleted because it is being used by posts",
                 null,
                 422,
             );
