@@ -15,27 +15,22 @@ class PostResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'title' => $this->title,
-            'slug' => $this->slug,
-            'excerpt' => $this->excerpt,
-            'content' => $this->content,
-            'status' => $this->status,
-            'published_at' => $this->published_at,
+            "id" => $this->id,
+            "title" => $this->title,
+            "slug" => $this->slug,
+            "excerpt" => $this->excerpt,
+            "content" => $this->content,
+            "status" => $this->status,
+            "published_at" => $this->published_at,
 
-            'author' => $this->author ? [
-                'id' => $this->author->id,
-                'name' => $this->author->name,
-            ] : null,
+            "author" => $this->author ? new UserResource($this->author) : null,
 
-            'category' => $this->category ? [
-                'id' => $this->category->id,
-                'name' => $this->category->name,
-                'slug' => $this->category->slug,
-            ] : null,
+            "category" => $this->category
+                ? new CategoryResource($this->category)
+                : null,
 
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            "created_at" => $this->created_at,
+            "updated_at" => $this->updated_at,
         ];
     }
 }

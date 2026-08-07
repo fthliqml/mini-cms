@@ -17,9 +17,19 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::with(["author", "category"])
-            ->latest()
-            ->paginate(10);
+        $user = request()->user("sanctum");
+
+        $query = Post::with(["author", "category"]);
+
+        if (!$user) {
+            $query->where("status", "published");
+        } elseif ($user->role === "author") {
+            $query->where(function ($q) use ($user) {
+                $q->where("status", "published")->orWhere("user_id", $user->id);
+            });
+        }
+
+        $posts = $query->latest()->paginate(10);
 
         return ApiResponse::success(
             PostResource::collection($posts),
@@ -32,7 +42,10 @@ class PostController extends Controller
      */
     public function store(StorePostRequest $request)
     {
+        $this->authorize("create", Post::class);
+
         $validated = $request->validated();
+        unset($validated["user_id"]);
 
         $post = Post::create([
             ...$validated,
@@ -57,6 +70,8 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
+        $this->authorize("view", $post);
+
         $post->load(["author", "category"]);
 
         return ApiResponse::success(
@@ -70,7 +85,10 @@ class PostController extends Controller
      */
     public function update(UpdatePostRequest $request, Post $post)
     {
+        $this->authorize("update", $post);
+
         $validated = $request->validated();
+        unset($validated["user_id"]);
 
         if (isset($validated["title"])) {
             $validated["slug"] = Str::slug($validated["title"], "-");
@@ -96,6 +114,8 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
+        $this->authorize("delete", $post);
+
         $post->delete();
 
         return ApiResponse::success(null, "Post deleted successfully!");
