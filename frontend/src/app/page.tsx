@@ -1,32 +1,29 @@
-import { Layers } from "lucide-react";
+import { getPosts } from "@/services/post";
+import { PostList } from "./_components/post-list";
 
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
-}
+export default async function Home() {
+  const { posts } = await getPosts();
 
-export default function Home() {
   return (
-    <div className="flex flex-1 flex-col font-sans">
-      {/* ── Navbar ── */}
-      <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-14 container items-center justify-between px-6">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Layers className="h-4 w-4 text-white" />
-            </div>
-            <span className="text-base font-bold tracking-tight">Mini CMS</span>
-          </div>
+    <div className="flex flex-1 flex-col font-sans min-h-screen bg-background">
+      {/* ── Main Content ── */}
+      <main className="mx-auto w-full container px-6 py-10">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
+            Public Posts
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Latest articles and updates from Mini CMS.
+          </p>
         </div>
-      </nav>
+
+        <PostList posts={posts} />
+      </main>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-border/50">
-        <div className="mx-auto max-w-3xl px-6 py-6 text-center text-sm text-muted-foreground">
-          Mini CMS &copy; {new Date().getFullYear()}
+      <footer className="border-t border-border/50 py-6">
+        <div className="mx-auto container px-6 text-center text-xs text-muted-foreground">
+          Mini CMS &copy; {new Date().getFullYear()} - Muhammad Fatihul Iqmal
         </div>
       </footer>
     </div>
