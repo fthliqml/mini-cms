@@ -98,6 +98,64 @@ cd frontend
 
 ---
 
+## 🎯 Use Cases
+
+| Use Case ID | Use Case Name | Actor(s) | Description | Access Level |
+|:---:|---|---|---|:---:|
+| **UC-01** | **View Published Posts** | Guest, Author, Admin | Browse published articles and read full post details by slug | Public |
+| **UC-02** | **Sign In** | Guest, Author, Admin | Authenticate with email & password via Sanctum session | Public |
+| **UC-03** | **Manage Own Posts** | Author, Admin | Create, edit, publish, and delete posts created by the current user | Author / Admin |
+| **UC-04** | **Manage All Posts** | Admin | View all posts (including drafts), edit, publish, or delete any post | Admin Only |
+| **UC-05** | **Manage Categories** | Admin | Create, edit, and delete post categories (full CRUD) | Admin Only |
+| **UC-06** | **Manage Users** | Admin | Create, update roles, and manage user accounts (full CRUD) | Admin Only |
+
+---
+
+## 🗄️ Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    users ||--o{ posts : "writes / owns"
+    categories ||--o{ posts : "categorizes"
+
+    users {
+        bigint id PK
+        string name
+        string email UK
+        timestamp email_verified_at
+        string password
+        string role "admin | author"
+        string remember_token
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    categories {
+        bigint id PK
+        string name
+        string slug UK
+        string description
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    posts {
+        bigint id PK
+        bigint user_id FK "cascadeOnDelete"
+        bigint category_id FK "restrictOnDelete"
+        string title
+        string slug UK
+        text excerpt "nullable"
+        longText content
+        enum status "draft | published"
+        timestamp published_at "nullable"
+        timestamp created_at
+        timestamp updated_at
+    }
+```
+
+---
+
 ## 📄 Author & License
 
 Created and maintained by **Muhammad Fatihul Iqmal**.

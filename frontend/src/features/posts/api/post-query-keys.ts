@@ -8,7 +8,4 @@ export const postQueryKeys = {
     viewer: AuthQueryScope | null,
     params: ManagedPostListParams,
   ) => [...postQueryKeys.management(), viewer, params] as const,
-  categories: () => [...postQueryKeys.all, "categories"] as const,
-  assignees: (viewer: AuthQueryScope | null) =>
-    [...postQueryKeys.all, "assignees", viewer] as const,
 };

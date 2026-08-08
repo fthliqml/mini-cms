@@ -12,6 +12,7 @@ import { getApiErrorMessage } from "@/lib/api";
 interface UseApiMutationOptions<TData, TVariables> {
   mutationFn: (variables: TVariables) => Promise<TData>;
   invalidateQueryKey?: QueryKey;
+  invalidateQueryKeys?: QueryKey[];
   successMessage: string | ((data: TData, variables: TVariables) => string);
   errorMessage: string;
 }
@@ -19,6 +20,7 @@ interface UseApiMutationOptions<TData, TVariables> {
 export function useApiMutation<TData, TVariables>({
   mutationFn,
   invalidateQueryKey,
+  invalidateQueryKeys,
   successMessage,
   errorMessage,
 }: UseApiMutationOptions<TData, TVariables>) {
@@ -33,8 +35,17 @@ export function useApiMutation<TData, TVariables>({
           : successMessage,
       );
 
-      if (invalidateQueryKey) {
-        await queryClient.invalidateQueries({ queryKey: invalidateQueryKey });
+      const queryKeys = [
+        ...(invalidateQueryKey ? [invalidateQueryKey] : []),
+        ...(invalidateQueryKeys ?? []),
+      ];
+
+      if (queryKeys.length > 0) {
+        await Promise.all(
+          queryKeys.map((queryKey) =>
+            queryClient.invalidateQueries({ queryKey }),
+          ),
+        );
       }
     },
     onError: (error) => {

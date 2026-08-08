@@ -24,17 +24,16 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import type { UserRole } from "@/features/auth/types/auth";
+import { useCategoryOptionsQuery } from "@/features/categories/hooks/use-category-options-query";
+import { useUserOptionsQuery } from "@/features/users/hooks/use-user-options-query";
 import { ApiError, getApiErrorMessage } from "@/lib/api";
 import {
   useCreatePostMutation,
   useUpdatePostMutation,
 } from "../hooks/use-post-mutations";
-import {
-  usePostAssigneesQuery,
-  usePostCategoriesQuery,
-} from "../hooks/use-post-options-query";
 import { postSchema, type PostFormValues } from "../schemas/post-schema";
 import type { CreatePostInput, Post, UpdatePostInput } from "../types/post";
+import { MarkdownEditor } from "./markdown-editor";
 
 type PostFormMode = "create" | "edit";
 
@@ -64,8 +63,8 @@ export function PostFormSheet({
   onClose,
   onSaved,
 }: PostFormSheetProps) {
-  const categoriesQuery = usePostCategoriesQuery();
-  const assigneesQuery = usePostAssigneesQuery({
+  const categoriesQuery = useCategoryOptionsQuery();
+  const assigneesQuery = useUserOptionsQuery({
     userId: currentUserId,
     role,
   });
@@ -143,7 +142,7 @@ export function PostFormSheet({
         }
       }}
     >
-      <SheetContent className="w-full gap-0 sm:max-w-xl">
+      <SheetContent className="gap-0 data-[side=right]:w-full data-[side=right]:sm:max-w-4xl">
         <SheetHeader className="border-b border-slate-100 px-5 py-4">
           <SheetTitle>
             {mode === "create" ? "Create post" : "Edit post"}
@@ -322,21 +321,37 @@ export function PostFormSheet({
 
           <div className="space-y-1.5">
             <Label htmlFor="post-content">Content</Label>
-            <Textarea
-              id="post-content"
-              rows={14}
-              placeholder="Write the article in Markdown..."
-              className="min-h-72 font-mono text-sm leading-6"
-              {...register("content")}
-              aria-invalid={Boolean(errors.content)}
+            <Controller
+              name="content"
+              control={control}
+              render={({ field }) => (
+                <MarkdownEditor
+                  id="post-content"
+                  name={field.name}
+                  value={field.value}
+                  placeholder="Write the article in Markdown..."
+                  disabled={isPending}
+                  ariaInvalid={Boolean(errors.content)}
+                  ariaDescribedBy={
+                    errors.content ? "post-content-error" : undefined
+                  }
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  inputRef={field.ref}
+                />
+              )}
             />
             {errors.content ? (
-              <p className="text-xs text-destructive">
+              <p
+                id="post-content-error"
+                className="text-xs text-destructive"
+              >
                 {errors.content.message}
               </p>
             ) : (
               <p className="text-[11px] text-muted-foreground">
-                Markdown formatting is supported on the public article page.
+                Use the toolbar or type Markdown directly. The preview matches
+                the public article renderer.
               </p>
             )}
           </div>

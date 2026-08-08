@@ -1,5 +1,5 @@
-import { ResourceWorkspace } from "@/features/dashboard/components/resource-workspace";
+import { CategoryManagement } from "@/features/categories";
 
 export default function AdminCategoriesPage() {
-  return <ResourceWorkspace resource="categories" />;
+  return <CategoryManagement />;
 }

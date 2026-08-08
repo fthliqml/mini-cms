@@ -38,6 +38,10 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::delete("/posts/{post}", [PostController::class, "destroy"]);
 
     // Category actions (Admin only via Policy)
+    Route::get("/management/categories", [
+        CategoryController::class,
+        "manage",
+    ]);
     Route::post("/categories", [CategoryController::class, "store"]);
     Route::put("/categories/{category}", [CategoryController::class, "update"]);
     Route::patch("/categories/{category}", [
