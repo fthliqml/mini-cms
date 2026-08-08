@@ -8,6 +8,7 @@ use App\Http\Requests\PostRequest\StorePostRequest;
 use App\Http\Requests\PostRequest\UpdatePostRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class PostController extends Controller
@@ -17,23 +18,73 @@ class PostController extends Controller
      */
     public function index()
     {
-        $user = request()->user();
-
-        $query = Post::with(["author", "category"]);
-
-        if (!$user) {
-            $query->where("status", "published");
-        } elseif ($user->role === "author") {
-            $query->where(function ($q) use ($user) {
-                $q->where("status", "published")->orWhere("user_id", $user->id);
-            });
-        }
-
-        $posts = $query->latest()->paginate(10);
+        $posts = Post::with(["author", "category"])
+            ->where("status", "published")
+            ->latest()
+            ->paginate(10);
 
         return ApiResponse::success(
             PostResource::collection($posts),
             "Posts retrieved successfully!",
+        );
+    }
+
+    /**
+     * Display posts available in the authenticated management workspace.
+     */
+    public function manage(Request $request)
+    {
+        $this->authorize("viewAny", Post::class);
+
+        $filters = $request->validate([
+            "search" => ["nullable", "string", "max:100"],
+            "status" => ["nullable", "string", "in:draft,published"],
+            "category_id" => [
+                "nullable",
+                "integer",
+                "exists:categories,id",
+            ],
+            "page" => ["nullable", "integer", "min:1"],
+        ]);
+        $user = $request->user();
+
+        $posts = Post::with(["author", "category"])
+            ->when(
+                $user->role !== "admin",
+                fn($query) => $query->where("user_id", $user->id),
+            )
+            ->when($filters["search"] ?? null, function ($query, $search) {
+                $query->where(function ($query) use ($search) {
+                    $query
+                        ->where("title", "like", "%{$search}%")
+                        ->orWhere("excerpt", "like", "%{$search}%");
+                });
+            })
+            ->when(
+                $filters["status"] ?? null,
+                fn($query, $status) => $query->where("status", $status),
+            )
+            ->when(
+                $filters["category_id"] ?? null,
+                fn($query, $categoryId) => $query->where(
+                    "category_id",
+                    $categoryId,
+                ),
+            )
+            ->latest("updated_at")
+            ->paginate(10);
+
+        return ApiResponse::success(
+            [
+                "items" => PostResource::collection($posts->items()),
+                "pagination" => [
+                    "current_page" => $posts->currentPage(),
+                    "last_page" => $posts->lastPage(),
+                    "per_page" => $posts->perPage(),
+                    "total" => $posts->total(),
+                ],
+            ],
+            "Management posts retrieved successfully!",
         );
     }
 
@@ -45,12 +96,16 @@ class PostController extends Controller
         $this->authorize("create", Post::class);
 
         $validated = $request->validated();
+        $authorId =
+            $request->user()->role === "admin"
+                ? ($validated["user_id"] ?? $request->user()->id)
+                : $request->user()->id;
         unset($validated["user_id"]);
 
         $post = Post::create([
             ...$validated,
-            "user_id" => $request->user()->id,
-            "slug" => Str::slug($validated["title"], "-"),
+            "user_id" => $authorId,
+            "slug" => $this->uniqueSlug($validated["title"]),
             "excerpt" => $validated["excerpt"] ?? null,
             "published_at" =>
                 $validated["status"] === "published" ? now() : null,
@@ -88,15 +143,24 @@ class PostController extends Controller
         $this->authorize("update", $post);
 
         $validated = $request->validated();
-        unset($validated["user_id"]);
+
+        if ($request->user()->role !== "admin") {
+            unset($validated["user_id"]);
+        }
 
         if (isset($validated["title"])) {
-            $validated["slug"] = Str::slug($validated["title"], "-");
+            $validated["slug"] = $this->uniqueSlug(
+                $validated["title"],
+                $post,
+            );
         }
 
         if (isset($validated["status"])) {
-            $validated["published_at"] =
-                $validated["status"] === "published" ? now() : null;
+            if ($validated["status"] === "draft") {
+                $validated["published_at"] = null;
+            } elseif (!$post->published_at) {
+                $validated["published_at"] = now();
+            }
         }
 
         $post->update($validated);
@@ -119,5 +183,27 @@ class PostController extends Controller
         $post->delete();
 
         return ApiResponse::success(null, "Post deleted successfully!");
+    }
+
+    private function uniqueSlug(string $title, ?Post $ignoredPost = null): string
+    {
+        $baseSlug = Str::slug($title, "-") ?: "post";
+        $slug = $baseSlug;
+        $suffix = 2;
+
+        while (
+            Post::query()
+                ->where("slug", $slug)
+                ->when(
+                    $ignoredPost,
+                    fn($query) => $query->where("id", "!=", $ignoredPost->id),
+                )
+                ->exists()
+        ) {
+            $slug = "{$baseSlug}-{$suffix}";
+            $suffix++;
+        }
+
+        return $slug;
     }
 }

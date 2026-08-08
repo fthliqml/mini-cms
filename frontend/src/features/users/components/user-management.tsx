@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuthStore } from "@/features/auth/store/auth-store";
+import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
 import type { UserRole } from "@/features/auth/types/auth";
 import { ApiError } from "@/lib/api";
 import { formatDate, getInitials } from "@/lib/utils";
@@ -41,7 +42,7 @@ type FormState =
 export function UserManagement() {
   const currentUser = useAuthStore((state) => state.user);
   const setCurrentUser = useAuthStore((state) => state.setUser);
-  const clearUser = useAuthStore((state) => state.clearUser);
+  const { endSession } = useAuthSession();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [role, setRole] = useState<RoleFilter>("all");
@@ -51,6 +52,9 @@ export function UserManagement() {
   const canManageUsers = currentUser?.role === "admin";
 
   const { data, error, isLoading, isFetching, refetch } = useUsersQuery(
+    currentUser
+      ? { userId: currentUser.id, role: currentUser.role }
+      : null,
     {
       page,
       ...(deferredSearch ? { search: deferredSearch } : {}),
@@ -61,9 +65,9 @@ export function UserManagement() {
 
   useEffect(() => {
     if (error instanceof ApiError && error.status === 401) {
-      clearUser();
+      endSession();
     }
-  }, [clearUser, error]);
+  }, [endSession, error]);
 
   const users = data?.items ?? [];
   const pagination = data?.pagination;

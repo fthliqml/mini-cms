@@ -1,5 +1,5 @@
-import { ResourceWorkspace } from "@/features/dashboard/components/resource-workspace";
+import { PostManagement } from "@/features/posts/components/post-management";
 
 export default function AdminPostsPage() {
-  return <ResourceWorkspace resource="posts" />;
+  return <PostManagement />;
 }

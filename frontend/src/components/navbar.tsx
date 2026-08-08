@@ -7,13 +7,14 @@ import { useState } from "react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { logoutUser } from "@/features/auth/api/logout";
+import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
 import { useAuthStore } from "@/features/auth/store/auth-store";
 
 export function Navbar() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const status = useAuthStore((state) => state.status);
-  const clearUser = useAuthStore((state) => state.clearUser);
+  const { endSession } = useAuthSession();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
@@ -24,7 +25,7 @@ export function Navbar() {
     } catch {
       // Clear local auth state even when the server session has expired.
     } finally {
-      clearUser();
+      endSession();
       setIsLoggingOut(false);
       router.push("/");
       router.refresh();

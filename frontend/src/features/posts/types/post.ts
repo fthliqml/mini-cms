@@ -1,3 +1,5 @@
+import type { PaginationMeta } from "@/types/pagination";
+
 export type PostStatus = "draft" | "published";
 
 export interface PostAuthor {
@@ -32,3 +34,26 @@ export interface Post {
   created_at: string;
   updated_at: string;
 }
+
+export interface ManagedPostListData {
+  items: Post[];
+  pagination: PaginationMeta;
+}
+
+export interface ManagedPostListParams {
+  page: number;
+  search?: string;
+  status?: PostStatus;
+  categoryId?: number;
+}
+
+export interface CreatePostInput {
+  user_id?: number;
+  category_id: number;
+  title: string;
+  excerpt?: string | null;
+  content: string;
+  status: PostStatus;
+}
+
+export type UpdatePostInput = CreatePostInput;

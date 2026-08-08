@@ -12,6 +12,10 @@ export async function getUsers(params: UserListParams) {
     searchParams.set("role", params.role);
   }
 
+  if (params.perPage) {
+    searchParams.set("per_page", String(params.perPage));
+  }
+
   const response = await fetcher<ApiResponse<UserListData>>(
     `/users?${searchParams.toString()}`,
   );

@@ -4,18 +4,18 @@ import { useQuery } from "@tanstack/react-query";
 
 import type { AuthQueryScope } from "@/features/auth/types/auth";
 import { isSameAuthQueryScope } from "@/lib/query";
-import { getUsers } from "../api/get-users";
-import { userQueryKeys } from "../api/user-query-keys";
-import type { UserListParams } from "../types/user";
+import { getManagedPosts } from "../api/get-managed-posts";
+import { postQueryKeys } from "../api/post-query-keys";
+import type { ManagedPostListParams } from "../types/post";
 
-export function useUsersQuery(
+export function useManagedPostsQuery(
   viewer: AuthQueryScope | null,
-  params: UserListParams,
+  params: ManagedPostListParams,
   enabled = true,
 ) {
   return useQuery({
-    queryKey: userQueryKeys.list(viewer, params),
-    queryFn: () => getUsers(params),
+    queryKey: postQueryKeys.managementList(viewer, params),
+    queryFn: () => getManagedPosts(params),
     enabled: enabled && viewer !== null,
     placeholderData: (previousData, previousQuery) => {
       const previousViewer = previousQuery?.queryKey[2] as

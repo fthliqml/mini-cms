@@ -1,8 +1,9 @@
+import type { AuthQueryScope } from "@/features/auth/types/auth";
 import type { UserListParams } from "../types/user";
 
 export const userQueryKeys = {
   all: ["users"] as const,
   lists: () => [...userQueryKeys.all, "list"] as const,
-  list: (params: UserListParams) =>
-    [...userQueryKeys.lists(), params] as const,
+  list: (viewer: AuthQueryScope | null, params: UserListParams) =>
+    [...userQueryKeys.lists(), viewer, params] as const,
 };

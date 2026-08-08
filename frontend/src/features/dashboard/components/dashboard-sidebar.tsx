@@ -21,7 +21,7 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { logoutUser } from "@/features/auth/api/logout";
-import { useAuthStore } from "@/features/auth/store/auth-store";
+import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
 import type { AuthUser } from "@/features/auth/types/auth";
 import { getDashboardNavigation } from "../config/navigation";
 
@@ -32,7 +32,7 @@ interface DashboardSidebarProps {
 export function DashboardSidebar({ user }: DashboardSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const clearUser = useAuthStore((state) => state.clearUser);
+  const { endSession } = useAuthSession();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigation = getDashboardNavigation(user.role);
 
@@ -44,7 +44,7 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
     } catch {
       // The local session should still be cleared when the server expired it.
     } finally {
-      clearUser();
+      endSession();
       setIsLoggingOut(false);
       router.replace("/");
       router.refresh();

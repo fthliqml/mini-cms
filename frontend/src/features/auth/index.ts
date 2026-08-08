@@ -3,6 +3,7 @@ export { loginUser } from "./api/login";
 export { logoutUser } from "./api/logout";
 export { AuthInitializer } from "./components/auth-initializer";
 export { LoginForm } from "./components/login-form";
+export { useAuthSession } from "./hooks/use-auth-session";
 export {
   loginSchema,
   type LoginFormValues,

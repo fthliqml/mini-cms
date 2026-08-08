@@ -12,7 +12,8 @@ class PostPolicy
      */
     public function viewAny(?User $user): bool
     {
-        return true;
+        return $user === null ||
+            in_array($user->role, ["admin", "author"], true);
     }
 
     /**
@@ -28,7 +29,8 @@ class PostPolicy
             return false;
         }
 
-        return $user->role === "admin" || $post->user_id === $user->id;
+        return $user->role === "admin" ||
+            ($user->role === "author" && $post->user_id === $user->id);
     }
 
     /**
@@ -36,7 +38,7 @@ class PostPolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        return in_array($user->role, ["admin", "author"], true);
     }
 
     /**
@@ -44,7 +46,8 @@ class PostPolicy
      */
     public function update(User $user, Post $post): bool
     {
-        return $user->role === "admin" || $post->user_id === $user->id;
+        return $user->role === "admin" ||
+            ($user->role === "author" && $post->user_id === $user->id);
     }
 
     /**
@@ -52,6 +55,7 @@ class PostPolicy
      */
     public function delete(User $user, Post $post): bool
     {
-        return $user->role === "admin" || $post->user_id === $user->id;
+        return $user->role === "admin" ||
+            ($user->role === "author" && $post->user_id === $user->id);
     }
 }

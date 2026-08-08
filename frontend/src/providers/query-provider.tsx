@@ -3,6 +3,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
+import { ApiError } from "@/lib/api";
+
 interface QueryProviderProps {
   children: React.ReactNode;
 }
@@ -15,7 +17,17 @@ export function QueryProvider({ children }: QueryProviderProps) {
           queries: {
             staleTime: 30_000,
             refetchOnWindowFocus: false,
-            retry: 1,
+            retry: (failureCount, error) => {
+              if (
+                error instanceof ApiError &&
+                error.status >= 400 &&
+                error.status < 500
+              ) {
+                return false;
+              }
+
+              return failureCount < 1;
+            },
           },
           mutations: {
             retry: false,

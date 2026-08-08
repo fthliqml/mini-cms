@@ -24,6 +24,7 @@ class UserController extends Controller
             "search" => ["nullable", "string", "max:100"],
             "role" => ["nullable", "string", "in:admin,author"],
             "page" => ["nullable", "integer", "min:1"],
+            "per_page" => ["nullable", "integer", "min:1", "max:100"],
         ]);
 
         $users = User::query()
@@ -39,7 +40,7 @@ class UserController extends Controller
                 fn($query, $role) => $query->where("role", $role),
             )
             ->latest()
-            ->paginate(10);
+            ->paginate($filters["per_page"] ?? 10);
 
         return ApiResponse::success(
             [

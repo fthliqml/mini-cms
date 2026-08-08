@@ -28,15 +28,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { loginUser } from "../api/login";
+import { useAuthSession } from "../hooks/use-auth-session";
 import {
   loginSchema,
   type LoginFormValues,
 } from "../schemas/login-schema";
-import { useAuthStore } from "../store/auth-store";
 
 export function LoginForm() {
   const router = useRouter();
-  const setUser = useAuthStore((state) => state.setUser);
+  const { startSession } = useAuthSession();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -66,7 +66,7 @@ export function LoginForm() {
         return;
       }
 
-      setUser(response.data);
+      startSession(response.data);
 
       if (response.data.role === "admin") {
         router.push("/dashboard/admin/posts");

@@ -1,13 +1,8 @@
 import type { AuthUser, UserRole } from "@/features/auth/types/auth";
+import type { PaginationMeta } from "@/types/pagination";
 
 export type ManagedUser = AuthUser;
-
-export interface PaginationMeta {
-  current_page: number;
-  last_page: number;
-  per_page: number;
-  total: number;
-}
+export type { PaginationMeta } from "@/types/pagination";
 
 export interface UserListData {
   items: ManagedUser[];
@@ -18,6 +13,7 @@ export interface UserListParams {
   page: number;
   search?: string;
   role?: UserRole;
+  perPage?: number;
 }
 
 export interface CreateUserInput {

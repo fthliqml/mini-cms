@@ -1,5 +1,10 @@
 export type UserRole = "admin" | "author";
 
+export interface AuthQueryScope {
+  userId: number;
+  role: UserRole;
+}
+
 export interface AuthUser {
   id: number;
   name: string;

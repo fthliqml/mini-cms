@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\PostRequest;
 
+use App\Models\Post;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StorePostRequest extends FormRequest
 {
@@ -12,7 +14,7 @@ class StorePostRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->can("create", Post::class) ?? false;
     }
 
     /**
@@ -23,6 +25,13 @@ class StorePostRequest extends FormRequest
     public function rules(): array
     {
         return [
+            "user_id" => [
+                "sometimes",
+                "required",
+                "integer",
+                "exists:users,id",
+                Rule::prohibitedIf(fn() => $this->user()?->role !== "admin"),
+            ],
             "category_id" => ["required", "exists:categories,id"],
             "title" => ["required", "string", "max:255", "unique:posts,title"],
             "excerpt" => ["nullable", "string"],
