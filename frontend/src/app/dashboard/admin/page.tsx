@@ -1,5 +1,5 @@
-import { AdminStats } from "@/features/dashboard";
+import { redirect } from "next/navigation";
 
 export default function AdminDashboardPage() {
-  return <AdminStats stats={[]} />;
+  redirect("/dashboard/admin/posts");
 }

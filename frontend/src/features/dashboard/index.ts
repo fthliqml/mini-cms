@@ -1,6 +1,2 @@
-export { AdminStats } from "./components/admin-stats";
-export { AuthorPostsTable } from "./components/author-posts-table";
-export type {
-  AuthorPostRow,
-  DashboardStat,
-} from "./types/dashboard";
+export { DashboardShell } from "./components/dashboard-shell";
+export { ResourceWorkspace } from "./components/resource-workspace";

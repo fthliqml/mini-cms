@@ -1,5 +1,5 @@
-import { AuthorPostsTable } from "@/features/dashboard";
+import { redirect } from "next/navigation";
 
 export default function AuthorDashboardPage() {
-  return <AuthorPostsTable posts={[]} />;
+  redirect("/dashboard/author/posts");
 }

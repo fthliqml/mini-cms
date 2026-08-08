@@ -69,9 +69,9 @@ export function LoginForm() {
       setUser(response.data);
 
       if (response.data.role === "admin") {
-        router.push("/dashboard/admin");
+        router.push("/dashboard/admin/posts");
       } else {
-        router.push("/dashboard/author");
+        router.push("/dashboard/author/posts");
       }
 
       router.refresh();

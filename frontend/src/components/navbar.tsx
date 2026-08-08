@@ -32,7 +32,9 @@ export function Navbar() {
   };
 
   const dashboardHref =
-    user?.role === "admin" ? "/dashboard/admin" : "/dashboard/author";
+    user?.role === "admin"
+      ? "/dashboard/admin/posts"
+      : "/dashboard/author/posts";
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
