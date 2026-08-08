@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\CategoryRequest;
 
+use App\Models\Category;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -13,7 +14,10 @@ class UpdateCategoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $category = $this->route("category");
+
+        return $category instanceof Category &&
+            ($this->user()?->can("update", $category) ?? false);
     }
 
     /**
@@ -28,6 +32,7 @@ class UpdateCategoryRequest extends FormRequest
         return [
             'name' => [
                 'sometimes',
+                'required',
                 'string',
                 'max:255',
                 Rule::unique('categories', 'name')->ignore($categoryId),

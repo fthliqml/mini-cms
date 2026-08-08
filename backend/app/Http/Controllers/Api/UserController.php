@@ -8,6 +8,7 @@ use App\Http\Requests\UserRequest\StoreUserRequest;
 use App\Http\Requests\UserRequest\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -15,14 +16,42 @@ class UserController extends Controller
     /**
      * Display a listing of users (Admin only).
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize("viewAny", User::class);
 
-        $users = User::latest()->paginate(10);
+        $filters = $request->validate([
+            "search" => ["nullable", "string", "max:100"],
+            "role" => ["nullable", "string", "in:admin,author"],
+            "page" => ["nullable", "integer", "min:1"],
+            "per_page" => ["nullable", "integer", "min:1", "max:100"],
+        ]);
+
+        $users = User::query()
+            ->when($filters["search"] ?? null, function ($query, $search) {
+                $query->where(function ($query) use ($search) {
+                    $query
+                        ->where("name", "like", "%{$search}%")
+                        ->orWhere("email", "like", "%{$search}%");
+                });
+            })
+            ->when(
+                $filters["role"] ?? null,
+                fn($query, $role) => $query->where("role", $role),
+            )
+            ->latest()
+            ->paginate($filters["per_page"] ?? 10);
 
         return ApiResponse::success(
-            UserResource::collection($users),
+            [
+                "items" => UserResource::collection($users->items()),
+                "pagination" => [
+                    "current_page" => $users->currentPage(),
+                    "last_page" => $users->lastPage(),
+                    "per_page" => $users->perPage(),
+                    "total" => $users->total(),
+                ],
+            ],
             "Users retrieved successfully!",
         );
     }
@@ -68,6 +97,18 @@ class UserController extends Controller
 
         $validated = $request->validated();
 
+        if (
+            $request->user()->is($user) &&
+            isset($validated["role"]) &&
+            $validated["role"] !== "admin"
+        ) {
+            return ApiResponse::error(
+                "You cannot remove your own admin role.",
+                null,
+                422,
+            );
+        }
+
         if (!empty($validated["password"])) {
             $validated["password"] = Hash::make($validated["password"]);
         } else {
@@ -92,6 +133,14 @@ class UserController extends Controller
         if (request()->user()->id === $user->id) {
             return ApiResponse::error(
                 "You cannot delete your own account.",
+                null,
+                422,
+            );
+        }
+
+        if ($user->posts()->exists()) {
+            return ApiResponse::error(
+                "User cannot be deleted while they still own posts.",
                 null,
                 422,
             );

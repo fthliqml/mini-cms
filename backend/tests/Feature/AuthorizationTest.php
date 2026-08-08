@@ -66,7 +66,7 @@ class AuthorizationTest extends TestCase
             'status' => 'published',
         ]);
 
-        $response = $this->actingAs($author2, 'sanctum')->putJson("/api/posts/{$post->id}", [
+        $response = $this->actingAs($author2, 'sanctum')->putJson("/api/posts/{$post->slug}", [
             'title' => 'Updated Title By Author 2',
         ]);
 
@@ -98,7 +98,7 @@ class AuthorizationTest extends TestCase
             'status' => 'published',
         ]);
 
-        $response = $this->actingAs($admin, 'sanctum')->putJson("/api/posts/{$post->id}", [
+        $response = $this->actingAs($admin, 'sanctum')->putJson("/api/posts/{$post->slug}", [
             'title' => 'Updated Title By Admin',
         ]);
 
@@ -112,12 +112,21 @@ class AuthorizationTest extends TestCase
     public function test_author_cannot_create_category(): void
     {
         $author = User::factory()->create(['role' => 'author']);
-
-        $response = $this->actingAs($author, 'sanctum')->postJson('/api/categories', [
-            'name' => 'New Category',
-            'description' => 'Desc',
+        $category = Category::create([
+            'name' => 'Existing',
+            'slug' => 'existing',
+            'description' => 'Existing category',
         ]);
 
+        $response = $this->actingAs($author, 'sanctum')->postJson(
+            '/api/categories',
+            [],
+        );
+
         $response->assertStatus(403);
+
+        $this->actingAs($author, 'sanctum')
+            ->patchJson("/api/categories/{$category->id}", ['name' => ''])
+            ->assertForbidden();
     }
 }

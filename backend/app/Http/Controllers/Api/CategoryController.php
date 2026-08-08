@@ -8,6 +8,7 @@ use App\Http\Requests\CategoryRequest\StoreCategoryRequest;
 use App\Http\Requests\CategoryRequest\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class CategoryController extends Controller
@@ -15,9 +16,14 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::withCount("posts")->latest()->paginate(10);
+        $filters = $request->validate([
+            "per_page" => ["nullable", "integer", "min:1", "max:100"],
+        ]);
+        $categories = Category::withCount("posts")
+            ->latest()
+            ->paginate($filters["per_page"] ?? 10);
 
         return ApiResponse::success(
             CategoryResource::collection($categories),

@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
+import { AuthInitializer } from "@/features/auth/components/auth-initializer";
+import { QueryProvider } from "@/providers/query-provider";
 import "./globals.css";
 
 const inter = Inter({
@@ -16,7 +19,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <QueryProvider>
+          <AuthInitializer />
+          {children}
+          <Toaster position="top-right" richColors closeButton />
+        </QueryProvider>
+      </body>
     </html>
   );
 }
