@@ -66,7 +66,7 @@ class AuthorizationTest extends TestCase
             'status' => 'published',
         ]);
 
-        $response = $this->actingAs($author2, 'sanctum')->putJson("/api/posts/{$post->id}", [
+        $response = $this->actingAs($author2, 'sanctum')->putJson("/api/posts/{$post->slug}", [
             'title' => 'Updated Title By Author 2',
         ]);
 
@@ -98,7 +98,7 @@ class AuthorizationTest extends TestCase
             'status' => 'published',
         ]);
 
-        $response = $this->actingAs($admin, 'sanctum')->putJson("/api/posts/{$post->id}", [
+        $response = $this->actingAs($admin, 'sanctum')->putJson("/api/posts/{$post->slug}", [
             'title' => 'Updated Title By Admin',
         ]);
 
