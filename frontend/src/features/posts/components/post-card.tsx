@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { formatDate, getInitials } from "@/lib/utils";
 import type { Post } from "../types/post";
+import { getMarkdownPreview } from "../utils/markdown-preview";
 
 interface PostCardProps {
   post: Post;
@@ -19,11 +20,13 @@ interface PostCardProps {
 
 export function PostCard({ post }: PostCardProps) {
   const publishedDate = formatDate(post.published_at || post.created_at);
-  const postContent = post.content || post.excerpt || "";
+  const postContent = getMarkdownPreview(
+    post.excerpt?.trim() || post.content || "",
+  );
 
   return (
-    <Link href={`/${post.slug}`} className="group block cursor-pointer">
-      <Card className="h-full cursor-pointer transition-all duration-200 hover:border-primary/50 hover:shadow-md">
+    <Link href={`/${post.slug}`} className="group block h-full cursor-pointer">
+      <Card className="flex h-full cursor-pointer flex-col overflow-hidden transition-all duration-200 hover:border-primary/50 hover:shadow-md">
         <CardHeader>
           <div className="mb-1 flex items-center justify-between gap-2">
             {post.category ? (
@@ -52,13 +55,13 @@ export function PostCard({ post }: PostCardProps) {
           ) : null}
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="flex-1">
           <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
             {postContent}
           </p>
         </CardContent>
 
-        <CardFooter className="flex flex-wrap items-center justify-between gap-3 border-t pt-3 text-xs text-muted-foreground">
+        <CardFooter className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t pt-3 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
               {getInitials(post.author?.name || "Admin")}
