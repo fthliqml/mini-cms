@@ -42,7 +42,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
             className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
             <ArrowLeft className="h-4 w-4 mr-1.5" />
-            Kembali ke Beranda
+            Back to Home
           </Link>
         </div>
 
@@ -123,7 +123,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
             <ArrowLeft className="h-4 w-4 mr-1.5" />
-            Kembali ke Semua Artikel
+            Back to All Articles
           </Link>
         </div>
       </main>

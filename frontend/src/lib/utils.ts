@@ -18,9 +18,9 @@ export function formatDate(dateInput?: string | Date | null) {
   if (!dateInput) return "";
   const date = new Date(dateInput);
   if (isNaN(date.getTime())) return "";
-  return new Intl.DateTimeFormat("id-ID", {
+  return new Intl.DateTimeFormat("en-US", {
     day: "numeric",
-    month: "long",
+    month: "short",
     year: "numeric",
   }).format(date);
 }
