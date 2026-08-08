@@ -17,7 +17,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $user = request()->user("sanctum");
+        $user = request()->user();
 
         $query = Post::with(["author", "category"]);
 
