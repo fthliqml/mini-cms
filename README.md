@@ -39,17 +39,7 @@ git clone https://github.com/fthliqml/mini-cms.git
 cd mini-cms
 ```
 
-### 1. Create the database
-
-Create an empty MySQL database:
-
-```sql
-CREATE DATABASE mini_cms
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_unicode_ci;
-```
-
-### 2. Start the backend
+### 1. Start the backend
 
 Open the first terminal from the repository root:
 
@@ -79,7 +69,7 @@ SANCTUM_STATEFUL_DOMAINS=localhost:3000,127.0.0.1:3000
 FRONTEND_URL=http://localhost:3000
 ```
 
-Create the public storage link, migrate the database, seed demo data, and run the API:
+Create the public storage link, migrate the database, seed demo data, and run the API. If `mini_cms` does not exist yet, answer `yes` when Laravel offers to create it:
 
 ```bash
 php artisan storage:link
@@ -89,7 +79,7 @@ php artisan serve
 
 The backend runs at [http://localhost:8000](http://localhost:8000). Its health endpoint is [http://localhost:8000/up](http://localhost:8000/up).
 
-### 3. Start the frontend
+### 2. Start the frontend
 
 Keep the backend running. Open a second terminal from the repository root:
 
@@ -199,7 +189,7 @@ erDiagram
 
 - **Login succeeds but the dashboard returns to the login page:** open both applications through `localhost`, clear old cookies, and verify `FRONTEND_URL`, `SESSION_DOMAIN`, and `SANCTUM_STATEFUL_DOMAINS`.
 - **Uploaded cover returns 404:** run `php artisan storage:link` inside `backend` and confirm `APP_URL=http://localhost:8000`.
-- **Database does not exist:** create `mini_cms` before running migrations and verify the MySQL credentials in `backend/.env`.
+- **Database setup fails:** confirm MySQL is running, verify the credentials in `backend/.env`, then rerun `php artisan migrate --seed` and accept Laravel's database creation prompt.
 - **Seed command reports duplicate users:** seeding is intended for a fresh database. Use `php artisan migrate:fresh --seed` only when it is safe to erase local development data.
 
 ## Author
