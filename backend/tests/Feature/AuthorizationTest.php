@@ -109,7 +109,7 @@ class AuthorizationTest extends TestCase
         ]);
     }
 
-    public function test_author_cannot_create_category(): void
+    public function test_author_cannot_create_or_update_category(): void
     {
         $author = User::factory()->create(['role' => 'author']);
         $category = Category::create([
@@ -118,12 +118,9 @@ class AuthorizationTest extends TestCase
             'description' => 'Existing category',
         ]);
 
-        $response = $this->actingAs($author, 'sanctum')->postJson(
-            '/api/categories',
-            [],
-        );
-
-        $response->assertStatus(403);
+        $this->actingAs($author, 'sanctum')
+            ->postJson('/api/categories', [])
+            ->assertForbidden();
 
         $this->actingAs($author, 'sanctum')
             ->patchJson("/api/categories/{$category->id}", ['name' => ''])

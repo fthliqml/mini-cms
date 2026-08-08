@@ -25,10 +25,10 @@ import {
 } from "@/components/ui/select";
 import { useAuthStore } from "@/features/auth/store/auth-store";
 import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
+import { useCategoryOptionsQuery } from "@/features/categories/hooks/use-category-options-query";
 import { ApiError } from "@/lib/api";
 import { formatDate, getInitials } from "@/lib/utils";
 import { useManagedPostsQuery } from "../hooks/use-managed-posts-query";
-import { usePostCategoriesQuery } from "../hooks/use-post-options-query";
 import type { Post, PostStatus } from "../types/post";
 import { DeletePostDialog } from "./delete-post-dialog";
 import { PostFormSheet } from "./post-form-sheet";
@@ -51,7 +51,7 @@ export function PostManagement() {
   const [deletingPost, setDeletingPost] = useState<Post | null>(null);
   const deferredSearch = useDeferredValue(search.trim());
   const canManagePosts = Boolean(currentUser);
-  const categoriesQuery = usePostCategoriesQuery(canManagePosts);
+  const categoriesQuery = useCategoryOptionsQuery(canManagePosts);
   const postsQuery = useManagedPostsQuery(
     currentUser
       ? { userId: currentUser.id, role: currentUser.role }

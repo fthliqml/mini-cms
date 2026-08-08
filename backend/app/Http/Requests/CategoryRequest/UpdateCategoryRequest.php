@@ -37,7 +37,7 @@ class UpdateCategoryRequest extends FormRequest
                 'max:255',
                 Rule::unique('categories', 'name')->ignore($categoryId),
             ],
-            'description' => ['nullable', 'string'],
+            'description' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

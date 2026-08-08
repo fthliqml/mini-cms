@@ -24,7 +24,7 @@ interface DeleteUserVariables {
 export function useCreateUserMutation() {
   return useApiMutation<ManagedUser, CreateUserInput>({
     mutationFn: createUser,
-    invalidateQueryKey: userQueryKeys.lists(),
+    invalidateQueryKey: userQueryKeys.all,
     successMessage: (user) => `${user.name} was added to the team.`,
     errorMessage: "The user could not be created.",
   });
@@ -33,7 +33,7 @@ export function useCreateUserMutation() {
 export function useUpdateUserMutation() {
   return useApiMutation<ManagedUser, UpdateUserVariables>({
     mutationFn: ({ id, input }) => updateUser(id, input),
-    invalidateQueryKey: userQueryKeys.lists(),
+    invalidateQueryKey: userQueryKeys.all,
     successMessage: (user) => `${user.name}'s changes were saved.`,
     errorMessage: "The user could not be updated.",
   });
@@ -42,7 +42,7 @@ export function useUpdateUserMutation() {
 export function useDeleteUserMutation() {
   return useApiMutation<void, DeleteUserVariables>({
     mutationFn: ({ id }) => deleteUser(id),
-    invalidateQueryKey: userQueryKeys.lists(),
+    invalidateQueryKey: userQueryKeys.all,
     successMessage: (_, user) => `${user.name} was removed from the team.`,
     errorMessage: "The user could not be deleted.",
   });

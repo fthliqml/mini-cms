@@ -24,15 +24,13 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import type { UserRole } from "@/features/auth/types/auth";
+import { useCategoryOptionsQuery } from "@/features/categories/hooks/use-category-options-query";
+import { useUserOptionsQuery } from "@/features/users/hooks/use-user-options-query";
 import { ApiError, getApiErrorMessage } from "@/lib/api";
 import {
   useCreatePostMutation,
   useUpdatePostMutation,
 } from "../hooks/use-post-mutations";
-import {
-  usePostAssigneesQuery,
-  usePostCategoriesQuery,
-} from "../hooks/use-post-options-query";
 import { postSchema, type PostFormValues } from "../schemas/post-schema";
 import type { CreatePostInput, Post, UpdatePostInput } from "../types/post";
 
@@ -64,8 +62,8 @@ export function PostFormSheet({
   onClose,
   onSaved,
 }: PostFormSheetProps) {
-  const categoriesQuery = usePostCategoriesQuery();
-  const assigneesQuery = usePostAssigneesQuery({
+  const categoriesQuery = useCategoryOptionsQuery();
+  const assigneesQuery = useUserOptionsQuery({
     userId: currentUserId,
     role,
   });

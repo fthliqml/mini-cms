@@ -23,14 +23,14 @@ export function getDashboardNavigation(
       href: `${basePath}/posts`,
       icon: Newspaper,
     },
-    {
-      title: "Categories",
-      href: `${basePath}/categories`,
-      icon: FolderKanban,
-    },
   ];
 
   if (role === "admin") {
+    items.push({
+      title: "Categories",
+      href: `${basePath}/categories`,
+      icon: FolderKanban,
+    });
     items.push({
       title: "Users",
       href: `${basePath}/users`,
