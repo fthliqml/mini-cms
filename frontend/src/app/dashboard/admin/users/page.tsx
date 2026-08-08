@@ -1,5 +1,5 @@
-import { ResourceWorkspace } from "@/features/dashboard/components/resource-workspace";
+import { UserManagement } from "@/features/users/components/user-management";
 
 export default function AdminUsersPage() {
-  return <ResourceWorkspace resource="users" />;
+  return <UserManagement />;
 }

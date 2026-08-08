@@ -4,6 +4,29 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+export type ValidationErrors = Record<string, string[]>;
+
+interface ApiErrorPayload {
+  message?: string;
+  error?: string;
+  errors?: ValidationErrors;
+}
+
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly errors?: ValidationErrors,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+export function getApiErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error && error.message ? error.message : fallback;
+}
+
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
@@ -32,11 +55,18 @@ export async function fetcher<T>(
     headers,
   });
 
-  const data = await response.json().catch(() => null);
+  const data = (await response.json().catch(() => null)) as
+    | ApiErrorPayload
+    | T
+    | null;
 
   if (!response.ok) {
-    throw new Error(
-      data?.message || data?.error || `HTTP Error ${response.status}`,
+    const error = data as ApiErrorPayload | null;
+
+    throw new ApiError(
+      error?.message || error?.error || `HTTP Error ${response.status}`,
+      response.status,
+      error?.errors,
     );
   }
 
