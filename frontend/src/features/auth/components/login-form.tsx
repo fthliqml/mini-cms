@@ -32,9 +32,11 @@ import {
   loginSchema,
   type LoginFormValues,
 } from "../schemas/login-schema";
+import { useAuthStore } from "../store/auth-store";
 
 export function LoginForm() {
   const router = useRouter();
+  const setUser = useAuthStore((state) => state.setUser);
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -63,6 +65,8 @@ export function LoginForm() {
         );
         return;
       }
+
+      setUser(response.data);
 
       if (response.data.role === "admin") {
         router.push("/dashboard/admin");
