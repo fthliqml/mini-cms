@@ -1,5 +1,6 @@
-import { Layers } from "lucide-react";
+import { Layers, LogIn } from "lucide-react";
 import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
 
 export function Navbar() {
   return (
@@ -10,6 +11,13 @@ export function Navbar() {
             <Layers className="h-4 w-4 text-primary-foreground" />
           </div>
           <span className="text-base font-bold tracking-tight">Mini CMS</span>
+        </Link>
+        <Link
+          href="/login"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
+          <LogIn className="h-3.5 w-3.5 mr-1.5" />
+          Sign In
         </Link>
       </div>
     </nav>
