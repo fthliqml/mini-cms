@@ -195,3 +195,21 @@ erDiagram
 ## Author
 
 Created and maintained by **Muhammad Fatihul Iqmal**.
+
+## Screenshots
+
+### Homepage
+
+![Mini CMS homepage](docs/screenshots/homepage.png)
+
+### Login
+
+![Mini CMS login page](docs/screenshots/login.png)
+
+### Admin Dashboard
+
+![Mini CMS admin dashboard](docs/screenshots/admin-dashboard.png)
+
+### Create New Post
+
+![Mini CMS create new post form](docs/screenshots/create-post.png)
