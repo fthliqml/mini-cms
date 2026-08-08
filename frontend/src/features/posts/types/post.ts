@@ -29,6 +29,7 @@ export interface Post {
   slug: string;
   excerpt?: string | null;
   content: string;
+  image_url?: string | null;
   status: PostStatus;
   published_at?: string | null;
   created_at: string;
@@ -53,6 +54,8 @@ export interface CreatePostInput {
   title: string;
   excerpt?: string | null;
   content: string;
+  image?: File;
+  remove_image?: boolean;
   status: PostStatus;
 }
 

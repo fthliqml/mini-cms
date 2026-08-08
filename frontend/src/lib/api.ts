@@ -41,9 +41,11 @@ export async function fetcher<T>(
   options: RequestInit = {},
 ): Promise<T> {
   const xsrfToken = getCsrfToken();
+  const isFormData =
+    typeof FormData !== "undefined" && options.body instanceof FormData;
 
   const headers: HeadersInit = {
-    "Content-Type": "application/json",
+    ...(!isFormData && { "Content-Type": "application/json" }),
     Accept: "application/json",
     ...(xsrfToken && { "X-XSRF-TOKEN": xsrfToken }),
     ...options.headers,

@@ -36,6 +36,13 @@ class StorePostRequest extends FormRequest
             "title" => ["required", "string", "max:255", "unique:posts,title"],
             "excerpt" => ["nullable", "string"],
             "content" => ["required", "string"],
+            "image" => [
+                "nullable",
+                "image",
+                "mimes:jpeg,jpg,png,webp",
+                "max:5120",
+                "dimensions:max_width=6000,max_height=6000",
+            ],
             "status" => ["required", "in:draft,published"],
         ];
     }

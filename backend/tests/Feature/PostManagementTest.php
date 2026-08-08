@@ -6,6 +6,8 @@ use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PostManagementTest extends TestCase
@@ -166,6 +168,144 @@ class PostManagementTest extends TestCase
             ->assertOk();
 
         $this->assertDatabaseMissing("posts", ["id" => $post->id]);
+    }
+
+    public function test_author_can_upload_and_replace_their_post_image(): void
+    {
+        Storage::fake("public");
+
+        $author = User::factory()->create(["role" => "author"]);
+        $category = $this->createCategory();
+        $image = UploadedFile::fake()->image("cover.jpg", 1200, 630);
+
+        $response = $this->actingAs($author, "sanctum")->post(
+            "/api/posts",
+            [
+                "category_id" => $category->id,
+                "title" => "Post With Cover",
+                "content" => "Content",
+                "status" => "draft",
+                "image" => $image,
+            ],
+            ["Accept" => "application/json"],
+        );
+
+        $response
+            ->assertCreated()
+            ->assertJsonPath("data.image_url", function ($url) {
+                return is_string($url) && str_contains($url, "/storage/posts/");
+            });
+
+        $post = Post::where("title", "Post With Cover")->firstOrFail();
+        $originalImagePath = $post->image_path;
+
+        Storage::disk("public")->assertExists($originalImagePath);
+
+        $replacement = UploadedFile::fake()->image(
+            "replacement.webp",
+            1200,
+            630,
+        );
+
+        $this->actingAs($author, "sanctum")
+            ->post(
+                "/api/posts/{$post->slug}",
+                ["_method" => "PATCH", "image" => $replacement],
+                ["Accept" => "application/json"],
+            )
+            ->assertOk();
+
+        $post->refresh();
+
+        $this->assertNotSame($originalImagePath, $post->image_path);
+        Storage::disk("public")->assertMissing($originalImagePath);
+        Storage::disk("public")->assertExists($post->image_path);
+    }
+
+    public function test_author_can_remove_an_image_and_deleting_a_post_cleans_up_the_file(): void
+    {
+        Storage::fake("public");
+
+        $author = User::factory()->create(["role" => "author"]);
+        $category = $this->createCategory();
+        $post = $this->createPost($author, $category, "Remove Cover");
+        $firstImagePath = UploadedFile::fake()
+            ->image("first.jpg", 1200, 630)
+            ->store("posts", "public");
+
+        $post->update(["image_path" => $firstImagePath]);
+
+        $this->actingAs($author, "sanctum")
+            ->post(
+                "/api/posts/{$post->slug}",
+                ["_method" => "PATCH", "remove_image" => "1"],
+                ["Accept" => "application/json"],
+            )
+            ->assertOk()
+            ->assertJsonPath("data.image_url", null);
+
+        $post->refresh();
+
+        $this->assertNull($post->image_path);
+        Storage::disk("public")->assertMissing($firstImagePath);
+
+        $secondImagePath = UploadedFile::fake()
+            ->image("second.jpg", 1200, 630)
+            ->store("posts", "public");
+
+        $post->update(["image_path" => $secondImagePath]);
+
+        $this->actingAs($author, "sanctum")
+            ->deleteJson("/api/posts/{$post->slug}")
+            ->assertOk();
+
+        Storage::disk("public")->assertMissing($secondImagePath);
+    }
+
+    public function test_post_image_rejects_unsupported_files(): void
+    {
+        Storage::fake("public");
+
+        $author = User::factory()->create(["role" => "author"]);
+        $category = $this->createCategory();
+
+        $this->actingAs($author, "sanctum")
+            ->post(
+                "/api/posts",
+                [
+                    "category_id" => $category->id,
+                    "title" => "Unsafe Cover",
+                    "content" => "Content",
+                    "status" => "draft",
+                    "image" => UploadedFile::fake()->create(
+                        "cover.svg",
+                        100,
+                        "image/svg+xml",
+                    ),
+                ],
+                ["Accept" => "application/json"],
+            )
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors("image");
+
+        $this->actingAs($author, "sanctum")
+            ->post(
+                "/api/posts",
+                [
+                    "category_id" => $category->id,
+                    "title" => "Oversized Cover",
+                    "content" => "Content",
+                    "status" => "draft",
+                    "image" => UploadedFile::fake()->image(
+                        "wide.jpg",
+                        6001,
+                        100,
+                    ),
+                ],
+                ["Accept" => "application/json"],
+            )
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors("image");
     }
 
     private function createCategory(): Category
