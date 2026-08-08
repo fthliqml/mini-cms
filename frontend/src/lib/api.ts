@@ -4,7 +4,8 @@ export interface ApiResponse<T> {
   data: T;
 }
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 function getCsrfToken(): string | null {
   if (typeof document === "undefined") return null;
@@ -14,7 +15,7 @@ function getCsrfToken(): string | null {
 
 export async function fetcher<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<T> {
   const xsrfToken = getCsrfToken();
 
@@ -34,7 +35,9 @@ export async function fetcher<T>(
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new Error(data?.message || data?.error || `HTTP Error ${response.status}`);
+    throw new Error(
+      data?.message || data?.error || `HTTP Error ${response.status}`,
+    );
   }
 
   return data as T;
