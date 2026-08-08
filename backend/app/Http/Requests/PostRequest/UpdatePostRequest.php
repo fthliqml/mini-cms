@@ -51,6 +51,18 @@ class UpdatePostRequest extends FormRequest
             ],
             "excerpt" => ["nullable", "string"],
             "content" => ["sometimes", "required", "string"],
+            "image" => [
+                "nullable",
+                "image",
+                "mimes:jpeg,jpg,png,webp",
+                "max:5120",
+                "dimensions:max_width=6000,max_height=6000",
+            ],
+            "remove_image" => [
+                "sometimes",
+                "boolean",
+                Rule::prohibitedIf(fn() => $this->hasFile("image")),
+            ],
             "status" => ["sometimes", "required", "in:draft,published"],
         ];
     }

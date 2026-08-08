@@ -34,6 +34,7 @@ import {
 import { postSchema, type PostFormValues } from "../schemas/post-schema";
 import type { CreatePostInput, Post, UpdatePostInput } from "../types/post";
 import { MarkdownEditor } from "./markdown-editor";
+import { PostImageField } from "./post-image-field";
 
 type PostFormMode = "create" | "edit";
 
@@ -52,6 +53,7 @@ const fieldNames = [
   "title",
   "excerpt",
   "content",
+  "image",
   "status",
 ] as const;
 
@@ -85,6 +87,8 @@ export function PostFormSheet({
       title: post?.title ?? "",
       excerpt: post?.excerpt ?? "",
       content: post?.content ?? "",
+      image: undefined,
+      remove_image: false,
       status: post?.status ?? "draft",
     },
   });
@@ -99,6 +103,8 @@ export function PostFormSheet({
       title: values.title,
       excerpt: values.excerpt || null,
       content: values.content,
+      image: values.image,
+      remove_image: values.remove_image,
       status: values.status,
       ...(role === "admin" && values.user_id
         ? { user_id: values.user_id }
@@ -171,6 +177,28 @@ export function PostFormSheet({
               try again.
             </div>
           ) : null}
+
+          <Controller
+            name="image"
+            control={control}
+            render={({ field: imageField }) => (
+              <Controller
+                name="remove_image"
+                control={control}
+                render={({ field: removeImageField }) => (
+                  <PostImageField
+                    file={imageField.value}
+                    existingUrl={post?.image_url}
+                    removeImage={removeImageField.value}
+                    disabled={isPending}
+                    error={errors.image?.message}
+                    onFileChange={imageField.onChange}
+                    onRemoveImageChange={removeImageField.onChange}
+                  />
+                )}
+              />
+            )}
+          />
 
           <div className="space-y-1.5">
             <Label htmlFor="post-title">Title</Label>

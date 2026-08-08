@@ -31,6 +31,7 @@ import { formatDate, getInitials } from "@/lib/utils";
 import { useManagedPostsQuery } from "../hooks/use-managed-posts-query";
 import type { Post, PostStatus } from "../types/post";
 import { DeletePostDialog } from "./delete-post-dialog";
+import { PostCoverImage } from "./post-cover-image";
 import { PostFormSheet } from "./post-form-sheet";
 
 type StatusFilter = "all" | PostStatus;
@@ -246,12 +247,21 @@ export function PostManagement() {
                         className="transition-colors hover:bg-slate-50/70"
                       >
                         <td className="max-w-sm px-5 py-4">
-                          <p className="truncate text-sm font-medium text-slate-900">
-                            {post.title}
-                          </p>
-                          <p className="mt-1 truncate text-xs text-slate-400">
-                            {post.excerpt || `/${post.slug}`}
-                          </p>
+                          <div className="flex items-center gap-3">
+                            <PostCoverImage
+                              src={post.image_url}
+                              alt=""
+                              className="aspect-[4/3] w-14 shrink-0 rounded-lg ring-1 ring-slate-900/8"
+                            />
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-medium text-slate-900">
+                                {post.title}
+                              </p>
+                              <p className="mt-1 truncate text-xs text-slate-400">
+                                {post.excerpt || `/${post.slug}`}
+                              </p>
+                            </div>
+                          </div>
                         </td>
                         <td className="px-4 py-4">
                           <Badge

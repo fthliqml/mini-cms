@@ -20,6 +20,7 @@ class PostResource extends JsonResource
             "slug" => $this->slug,
             "excerpt" => $this->excerpt,
             "content" => $this->content,
+            "image_url" => $this->image_url,
             "status" => $this->status,
             "published_at" => $this->published_at,
 

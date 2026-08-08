@@ -9,10 +9,10 @@ interface SiteShellProps {
 
 export function SiteShell({ children }: SiteShellProps) {
   return (
-    <>
+    <div className="public-site flex min-h-screen flex-1 flex-col">
       <Navbar />
       <div className="flex flex-1 flex-col">{children}</div>
       <Footer />
-    </>
+    </div>
   );
 }

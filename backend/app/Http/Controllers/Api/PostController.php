@@ -9,7 +9,9 @@ use App\Http\Requests\PostRequest\UpdatePostRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 
 class PostController extends Controller
 {
@@ -20,7 +22,7 @@ class PostController extends Controller
     {
         $posts = Post::with(["author", "category"])
             ->where("status", "published")
-            ->latest()
+            ->latest("published_at")
             ->paginate(10);
 
         return ApiResponse::success(
@@ -96,20 +98,30 @@ class PostController extends Controller
         $this->authorize("create", Post::class);
 
         $validated = $request->validated();
+        $imagePath = $request->file("image")?->store("posts", "public");
         $authorId =
             $request->user()->role === "admin"
                 ? ($validated["user_id"] ?? $request->user()->id)
                 : $request->user()->id;
-        unset($validated["user_id"]);
+        unset($validated["user_id"], $validated["image"]);
 
-        $post = Post::create([
-            ...$validated,
-            "user_id" => $authorId,
-            "slug" => $this->uniqueSlug($validated["title"]),
-            "excerpt" => $validated["excerpt"] ?? null,
-            "published_at" =>
-                $validated["status"] === "published" ? now() : null,
-        ]);
+        try {
+            $post = Post::create([
+                ...$validated,
+                "user_id" => $authorId,
+                "slug" => $this->uniqueSlug($validated["title"]),
+                "excerpt" => $validated["excerpt"] ?? null,
+                "image_path" => $imagePath,
+                "published_at" =>
+                    $validated["status"] === "published" ? now() : null,
+            ]);
+        } catch (Throwable $exception) {
+            if ($imagePath) {
+                Storage::disk("public")->delete($imagePath);
+            }
+
+            throw $exception;
+        }
 
         $post->load(["author", "category"]);
 
@@ -143,6 +155,14 @@ class PostController extends Controller
         $this->authorize("update", $post);
 
         $validated = $request->validated();
+        $previousImagePath = $post->image_path;
+        $uploadedImagePath = $request->file("image")?->store(
+            "posts",
+            "public",
+        );
+        $removeImage = (bool) ($validated["remove_image"] ?? false);
+
+        unset($validated["image"], $validated["remove_image"]);
 
         if ($request->user()->role !== "admin") {
             unset($validated["user_id"]);
@@ -163,7 +183,29 @@ class PostController extends Controller
             }
         }
 
-        $post->update($validated);
+        if ($uploadedImagePath) {
+            $validated["image_path"] = $uploadedImagePath;
+        } elseif ($removeImage) {
+            $validated["image_path"] = null;
+        }
+
+        try {
+            $post->update($validated);
+        } catch (Throwable $exception) {
+            if ($uploadedImagePath) {
+                Storage::disk("public")->delete($uploadedImagePath);
+            }
+
+            throw $exception;
+        }
+
+        if (
+            $previousImagePath &&
+            $previousImagePath !== $post->image_path
+        ) {
+            $previousImage = new Post(["image_path" => $previousImagePath]);
+            $previousImage->deleteStoredImage();
+        }
 
         $post->load(["author", "category"]);
 
