@@ -2,6 +2,15 @@
 
 A lightweight content management system with a Laravel API and a Next.js App Router frontend. Mini CMS includes a public editorial blog, an admin dashboard, a focused author workspace, Markdown publishing, and cover image management.
 
+## Quick Links
+
+- [Installation](#installation)
+- [Demo Accounts](#demo-accounts)
+- [Verify the Installation](#verify-the-installation)
+- [Use Cases](#use-cases)
+- [Screenshots](#screenshots)
+- [Troubleshooting](#troubleshooting)
+
 ## Tech Stack
 
 ### Backend
@@ -210,6 +219,10 @@ Created and maintained by **Muhammad Fatihul Iqmal**.
 
 ![Mini CMS admin dashboard](docs/screenshots/admin-dashboard.png)
 
-### Create New Post
+### Author Homepage
 
-![Mini CMS create new post form](docs/screenshots/create-post.png)
+![Mini CMS author homepage](docs/screenshots/author-homepage.png)
+
+### Author Create Post
+
+![Mini CMS author create post](docs/screenshots/author-create-post.png)
