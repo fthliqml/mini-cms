@@ -14,10 +14,10 @@ class UpdateUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $user = $this->route("user");
+        $user = $this->route('user');
 
         return $user instanceof User &&
-            ($this->user()?->can("update", $user) ?? false);
+            ($this->user()?->can('update', $user) ?? false);
     }
 
     /**
@@ -27,20 +27,24 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules(): array
     {
-        $userId = $this->route("user")?->id ?? $this->route("user");
+        $userId = $this->route('user')?->id ?? $this->route('user');
 
         return [
-            "name" => ["sometimes", "required", "string", "max:255"],
-            "email" => [
-                "sometimes",
-                "required",
-                "string",
-                "email",
-                "max:255",
-                Rule::unique("users", "email")->ignore($userId),
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'email' => [
+                'sometimes',
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->ignore($userId),
             ],
-            "password" => ["nullable", "string", "min:8"],
-            "role" => ["sometimes", "string", "in:admin,author"],
+            'password' => ['nullable', 'string', 'min:8'],
+            'role' => [
+                'sometimes',
+                'string',
+                Rule::in(User::SUPPORTED_ROLES),
+            ],
         ];
     }
 }

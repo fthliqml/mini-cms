@@ -12,8 +12,7 @@ class PostPolicy
      */
     public function viewAny(?User $user): bool
     {
-        return $user === null ||
-            in_array($user->role, ["admin", "author"], true);
+        return $user === null || $user->hasSupportedRole();
     }
 
     /**
@@ -21,16 +20,16 @@ class PostPolicy
      */
     public function view(?User $user, Post $post): bool
     {
-        if ($post->status === "published") {
+        if ($post->isPublished()) {
             return true;
         }
 
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
-        return $user->role === "admin" ||
-            ($user->role === "author" && $post->user_id === $user->id);
+        return $user->isAdmin() ||
+            ($user->isAuthor() && $post->user_id === $user->id);
     }
 
     /**
@@ -38,7 +37,7 @@ class PostPolicy
      */
     public function create(User $user): bool
     {
-        return in_array($user->role, ["admin", "author"], true);
+        return $user->hasSupportedRole();
     }
 
     /**
@@ -46,8 +45,8 @@ class PostPolicy
      */
     public function update(User $user, Post $post): bool
     {
-        return $user->role === "admin" ||
-            ($user->role === "author" && $post->user_id === $user->id);
+        return $user->isAdmin() ||
+            ($user->isAuthor() && $post->user_id === $user->id);
     }
 
     /**
@@ -55,7 +54,7 @@ class PostPolicy
      */
     public function delete(User $user, Post $post): bool
     {
-        return $user->role === "admin" ||
-            ($user->role === "author" && $post->user_id === $user->id);
+        return $user->isAdmin() ||
+            ($user->isAuthor() && $post->user_id === $user->id);
     }
 }
