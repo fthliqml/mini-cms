@@ -9,30 +9,39 @@ use Illuminate\Support\Str;
 
 class Post extends Model
 {
+    public const STATUS_DRAFT = 'draft';
+
+    public const STATUS_PUBLISHED = 'published';
+
+    public const STATUSES = [
+        self::STATUS_DRAFT,
+        self::STATUS_PUBLISHED,
+    ];
+
     protected $fillable = [
-        "user_id",
-        "category_id",
-        "title",
-        "slug",
-        "excerpt",
-        "content",
-        "image_path",
-        "status",
-        "published_at",
+        'user_id',
+        'category_id',
+        'title',
+        'slug',
+        'excerpt',
+        'content',
+        'image_path',
+        'status',
+        'published_at',
     ];
 
     protected $casts = [
-        "published_at" => "datetime",
+        'published_at' => 'datetime',
     ];
 
     public function getRouteKeyName(): string
     {
-        return "slug";
+        return 'slug';
     }
 
     public function author(): BelongsTo
     {
-        return $this->belongsTo(User::class, "user_id");
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function category(): BelongsTo
@@ -40,31 +49,36 @@ class Post extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function isPublished(): bool
+    {
+        return $this->status === self::STATUS_PUBLISHED;
+    }
+
     public function getImageUrlAttribute(): ?string
     {
-        if (!$this->image_path) {
+        if (! $this->image_path) {
             return null;
         }
 
-        if (Str::startsWith($this->image_path, ["http://", "https://"])) {
+        if (Str::startsWith($this->image_path, ['http://', 'https://'])) {
             return $this->image_path;
         }
 
-        return Storage::disk("public")->url($this->image_path);
+        return Storage::disk('public')->url($this->image_path);
     }
 
     public function deleteStoredImage(): void
     {
         if (
             $this->image_path &&
-            !Str::startsWith($this->image_path, ["http://", "https://"])
+            ! Str::startsWith($this->image_path, ['http://', 'https://'])
         ) {
-            Storage::disk("public")->delete($this->image_path);
+            Storage::disk('public')->delete($this->image_path);
         }
     }
 
     protected static function booted(): void
     {
-        static::deleted(fn(Post $post) => $post->deleteStoredImage());
+        static::deleted(fn (Post $post) => $post->deleteStoredImage());
     }
 }

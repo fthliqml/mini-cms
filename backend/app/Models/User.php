@@ -15,9 +15,18 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $fillable = ["name", "email", "password", "role"];
+    public const ROLE_ADMIN = 'admin';
 
-    protected $hidden = ["password", "remember_token"];
+    public const ROLE_AUTHOR = 'author';
+
+    public const SUPPORTED_ROLES = [
+        self::ROLE_ADMIN,
+        self::ROLE_AUTHOR,
+    ];
+
+    protected $fillable = ['name', 'email', 'password', 'role'];
+
+    protected $hidden = ['password', 'remember_token'];
 
     /**
      * Get the attributes that should be cast.
@@ -27,13 +36,28 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            "email_verified_at" => "datetime",
-            "password" => "hashed",
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
         ];
     }
 
     public function posts(): HasMany
     {
         return $this->hasMany(Post::class);
+    }
+
+    public function hasSupportedRole(): bool
+    {
+        return in_array($this->role, self::SUPPORTED_ROLES, true);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isAuthor(): bool
+    {
+        return $this->role === self::ROLE_AUTHOR;
     }
 }
