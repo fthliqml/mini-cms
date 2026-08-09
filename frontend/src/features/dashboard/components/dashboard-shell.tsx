@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuthStore } from "@/features/auth/store/auth-store";
-import { getDashboardNavigation } from "../config/navigation";
+import { adminDashboardNavigation } from "../config/navigation";
 import { DashboardSidebar } from "./dashboard-sidebar";
 
 interface DashboardShellProps {
@@ -40,11 +40,8 @@ export function DashboardShell({ children }: DashboardShellProps) {
   const user = useAuthStore((state) => state.user);
   const status = useAuthStore((state) => state.status);
 
-  const expectedRoot = user ? `/dashboard/${user.role}` : null;
-  const expectedEntry = expectedRoot ? `${expectedRoot}/posts` : null;
-  const hasRoleAccess = expectedRoot
-    ? pathname === expectedRoot || pathname.startsWith(`${expectedRoot}/`)
-    : false;
+  const isAdmin = user?.role === "admin";
+  const hasAdminAccess = isAdmin && pathname.startsWith("/dashboard/admin");
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -52,18 +49,23 @@ export function DashboardShell({ children }: DashboardShellProps) {
       return;
     }
 
-    if (status === "authenticated" && expectedEntry && !hasRoleAccess) {
-      router.replace(expectedEntry);
+    if (status === "authenticated" && user?.role === "author") {
+      router.replace("/author/posts");
+      return;
     }
-  }, [expectedEntry, hasRoleAccess, router, status]);
 
-  if (status !== "authenticated" || !user || !hasRoleAccess) {
+    if (status === "authenticated" && isAdmin && !hasAdminAccess) {
+      router.replace("/dashboard/admin/posts");
+    }
+  }, [hasAdminAccess, isAdmin, router, status, user?.role]);
+
+  if (status !== "authenticated" || !user || !hasAdminAccess) {
     return <DashboardLoading />;
   }
 
-  const navigation = getDashboardNavigation(user.role);
   const currentPage =
-    navigation.find((item) => pathname.startsWith(item.href))?.title ??
+    adminDashboardNavigation.find((item) => pathname.startsWith(item.href))
+      ?.title ??
     "Dashboard";
 
   return (

@@ -13,12 +13,11 @@ import {
   Quote,
 } from "lucide-react";
 import { useRef, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { MarkdownContent } from "./markdown-content";
 
 type MobileView = "write" | "preview";
 
@@ -257,11 +256,10 @@ export function MarkdownEditor({
           </div>
           <div className="h-[28rem] overflow-y-auto bg-slate-50/35 px-5 py-4">
             {value.trim() ? (
-              <div className="prose prose-sm prose-slate max-w-none leading-relaxed">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {value}
-                </ReactMarkdown>
-              </div>
+              <MarkdownContent
+                content={value}
+                className="prose-sm leading-relaxed"
+              />
             ) : (
               <div className="flex h-full items-center justify-center text-center">
                 <div>

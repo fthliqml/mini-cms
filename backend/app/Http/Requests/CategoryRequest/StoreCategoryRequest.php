@@ -13,7 +13,7 @@ class StoreCategoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()?->can("create", Category::class) ?? false;
+        return $this->user()?->can('create', Category::class) ?? false;
     }
 
     /**

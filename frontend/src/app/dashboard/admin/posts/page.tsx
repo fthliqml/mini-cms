@@ -1,5 +1,5 @@
-import { PostManagement } from "@/features/posts/components/post-management";
+import { AdminPostManagement } from "@/features/posts/components/post-management";
 
 export default function AdminPostsPage() {
-  return <PostManagement />;
+  return <AdminPostManagement />;
 }

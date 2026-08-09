@@ -14,7 +14,7 @@ class StorePostRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()?->can("create", Post::class) ?? false;
+        return $this->user()?->can('create', Post::class) ?? false;
     }
 
     /**
@@ -25,25 +25,27 @@ class StorePostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "user_id" => [
-                "sometimes",
-                "required",
-                "integer",
-                "exists:users,id",
-                Rule::prohibitedIf(fn() => $this->user()?->role !== "admin"),
+            'user_id' => [
+                'sometimes',
+                'required',
+                'integer',
+                'exists:users,id',
+                Rule::prohibitedIf(
+                    fn () => ! ($this->user()?->isAdmin() ?? false),
+                ),
             ],
-            "category_id" => ["required", "exists:categories,id"],
-            "title" => ["required", "string", "max:255", "unique:posts,title"],
-            "excerpt" => ["nullable", "string"],
-            "content" => ["required", "string"],
-            "image" => [
-                "nullable",
-                "image",
-                "mimes:jpeg,jpg,png,webp",
-                "max:5120",
-                "dimensions:max_width=6000,max_height=6000",
+            'category_id' => ['required', 'exists:categories,id'],
+            'title' => ['required', 'string', 'max:255', 'unique:posts,title'],
+            'excerpt' => ['nullable', 'string'],
+            'content' => ['required', 'string'],
+            'image' => [
+                'nullable',
+                'image',
+                'mimes:jpeg,jpg,png,webp',
+                'max:5120',
+                'dimensions:max_width=6000,max_height=6000',
             ],
-            "status" => ["required", "in:draft,published"],
+            'status' => ['required', Rule::in(Post::STATUSES)],
         ];
     }
 }

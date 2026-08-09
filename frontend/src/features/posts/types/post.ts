@@ -5,10 +5,7 @@ export type PostStatus = "draft" | "published";
 export interface PostAuthor {
   id: number;
   name: string;
-  email: string;
   role: "admin" | "author";
-  created_at: string;
-  updated_at: string;
 }
 
 export interface PostCategory {

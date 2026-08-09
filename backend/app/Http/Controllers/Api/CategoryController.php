@@ -8,6 +8,9 @@ use App\Http\Requests\CategoryRequest\StoreCategoryRequest;
 use App\Http\Requests\CategoryRequest\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
+use App\Models\Post;
+use App\Support\PaginationData;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -16,84 +19,79 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $filters = $request->validate([
-            "per_page" => ["nullable", "integer", "min:1", "max:100"],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ]);
         $categories = Category::withCount([
-            "posts" => fn($query) => $query->where(
-                "status",
-                "published",
+            'posts' => fn ($query) => $query->where(
+                'status',
+                Post::STATUS_PUBLISHED,
             ),
         ])
             ->latest()
-            ->paginate($filters["per_page"] ?? 10);
+            ->paginate($filters['per_page'] ?? 10);
 
         return ApiResponse::success(
             CategoryResource::collection($categories),
-            "Categories retrieved successfully!",
+            'Categories retrieved successfully!',
         );
     }
 
     /**
      * Display categories available in the authenticated management workspace.
      */
-    public function manage(Request $request)
+    public function manage(Request $request): JsonResponse
     {
-        $this->authorize("manage", Category::class);
+        $this->authorize('manage', Category::class);
 
         $filters = $request->validate([
-            "search" => ["nullable", "string", "max:100"],
-            "page" => ["nullable", "integer", "min:1"],
+            'search' => ['nullable', 'string', 'max:100'],
+            'page' => ['nullable', 'integer', 'min:1'],
         ]);
-        $categories = Category::withCount("posts")
-            ->when($filters["search"] ?? null, function ($query, $search) {
+        $categories = Category::withCount('posts')
+            ->when($filters['search'] ?? null, function ($query, $search) {
                 $query->where(function ($query) use ($search) {
                     $query
-                        ->where("name", "like", "%{$search}%")
-                        ->orWhere("description", "like", "%{$search}%");
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
                 });
             })
-            ->latest("updated_at")
+            ->latest('updated_at')
             ->paginate(10);
 
         return ApiResponse::success(
             [
-                "items" => CategoryResource::collection(
+                'items' => CategoryResource::collection(
                     $categories->items(),
                 ),
-                "pagination" => [
-                    "current_page" => $categories->currentPage(),
-                    "last_page" => $categories->lastPage(),
-                    "per_page" => $categories->perPage(),
-                    "total" => $categories->total(),
-                ],
+                'pagination' => PaginationData::from($categories),
             ],
-            "Management categories retrieved successfully!",
+            'Management categories retrieved successfully!',
         );
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreCategoryRequest $request)
+    public function store(StoreCategoryRequest $request): JsonResponse
     {
-        $this->authorize("create", Category::class);
+        $this->authorize('create', Category::class);
 
         $validated = $request->validated();
 
         $category = Category::create([
             ...$validated,
-            "slug" => $this->uniqueSlug($validated["name"]),
-            "description" => $validated["description"] ?? "",
+            'slug' => $this->uniqueSlug($validated['name']),
+            'description' => $validated['description'] ?? '',
         ]);
 
-        $category->loadCount("posts");
+        $category->loadCount('posts');
 
         return ApiResponse::success(
             new CategoryResource($category),
-            "Category created successfully!",
+            'Category created successfully!',
             201,
         );
     }
@@ -101,63 +99,65 @@ class CategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Category $category)
+    public function show(Category $category): JsonResponse
     {
         $category->loadCount([
-            "posts" => fn($query) => $query->where(
-                "status",
-                "published",
+            'posts' => fn ($query) => $query->where(
+                'status',
+                Post::STATUS_PUBLISHED,
             ),
         ]);
 
         return ApiResponse::success(
             new CategoryResource($category),
-            "Category retrieved successfully!",
+            'Category retrieved successfully!',
         );
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCategoryRequest $request, Category $category)
-    {
-        $this->authorize("update", $category);
+    public function update(
+        UpdateCategoryRequest $request,
+        Category $category,
+    ): JsonResponse {
+        $this->authorize('update', $category);
 
         $validated = $request->validated();
 
-        if (isset($validated["name"])) {
-            $validated["slug"] = $this->uniqueSlug(
-                $validated["name"],
+        if (isset($validated['name'])) {
+            $validated['slug'] = $this->uniqueSlug(
+                $validated['name'],
                 $category,
             );
         }
 
         if (
-            array_key_exists("description", $validated) &&
-            $validated["description"] === null
+            array_key_exists('description', $validated) &&
+            $validated['description'] === null
         ) {
-            $validated["description"] = "";
+            $validated['description'] = '';
         }
 
         $category->update($validated);
-        $category->loadCount("posts");
+        $category->loadCount('posts');
 
         return ApiResponse::success(
             new CategoryResource($category),
-            "Category updated successfully!",
+            'Category updated successfully!',
         );
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Category $category)
+    public function destroy(Category $category): JsonResponse
     {
-        $this->authorize("delete", $category);
+        $this->authorize('delete', $category);
 
         if ($category->posts()->exists()) {
             return ApiResponse::error(
-                "Category cannot be deleted because it is being used by posts",
+                'Category cannot be deleted because it is being used by posts',
                 null,
                 422,
             );
@@ -165,25 +165,25 @@ class CategoryController extends Controller
 
         $category->delete();
 
-        return ApiResponse::success(null, "Category deleted successfully!");
+        return ApiResponse::success(null, 'Category deleted successfully!');
     }
 
     private function uniqueSlug(
         string $name,
         ?Category $ignoredCategory = null,
     ): string {
-        $baseSlug = Str::slug($name, "-") ?: "category";
+        $baseSlug = Str::slug($name, '-') ?: 'category';
         $slug = $baseSlug;
         $suffix = 2;
 
         while (
             Category::query()
-                ->where("slug", $slug)
+                ->where('slug', $slug)
                 ->when(
                     $ignoredCategory,
-                    fn($query) => $query->where(
-                        "id",
-                        "!=",
+                    fn ($query) => $query->where(
+                        'id',
+                        '!=',
                         $ignoredCategory->id,
                     ),
                 )

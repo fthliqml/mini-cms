@@ -14,10 +14,10 @@ class UpdatePostRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $post = $this->route("post");
+        $post = $this->route('post');
 
         return $post instanceof Post &&
-            ($this->user()?->can("update", $post) ?? false);
+            ($this->user()?->can('update', $post) ?? false);
     }
 
     /**
@@ -27,43 +27,49 @@ class UpdatePostRequest extends FormRequest
      */
     public function rules(): array
     {
-        $postId = $this->route("post")?->id ?? $this->route("post");
+        $postId = $this->route('post')?->id ?? $this->route('post');
 
         return [
-            "user_id" => [
-                "sometimes",
-                "required",
-                "integer",
-                "exists:users,id",
-                Rule::prohibitedIf(fn() => $this->user()?->role !== "admin"),
+            'user_id' => [
+                'sometimes',
+                'required',
+                'integer',
+                'exists:users,id',
+                Rule::prohibitedIf(
+                    fn () => ! ($this->user()?->isAdmin() ?? false),
+                ),
             ],
-            "category_id" => [
-                "sometimes",
-                "required",
-                "exists:categories,id",
+            'category_id' => [
+                'sometimes',
+                'required',
+                'exists:categories,id',
             ],
-            "title" => [
-                "sometimes",
-                "required",
-                "string",
-                "max:255",
-                Rule::unique("posts", "title")->ignore($postId),
+            'title' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('posts', 'title')->ignore($postId),
             ],
-            "excerpt" => ["nullable", "string"],
-            "content" => ["sometimes", "required", "string"],
-            "image" => [
-                "nullable",
-                "image",
-                "mimes:jpeg,jpg,png,webp",
-                "max:5120",
-                "dimensions:max_width=6000,max_height=6000",
+            'excerpt' => ['nullable', 'string'],
+            'content' => ['sometimes', 'required', 'string'],
+            'image' => [
+                'nullable',
+                'image',
+                'mimes:jpeg,jpg,png,webp',
+                'max:5120',
+                'dimensions:max_width=6000,max_height=6000',
             ],
-            "remove_image" => [
-                "sometimes",
-                "boolean",
-                Rule::prohibitedIf(fn() => $this->hasFile("image")),
+            'remove_image' => [
+                'sometimes',
+                'boolean',
+                Rule::prohibitedIf(fn () => $this->hasFile('image')),
             ],
-            "status" => ["sometimes", "required", "in:draft,published"],
+            'status' => [
+                'sometimes',
+                'required',
+                Rule::in(Post::STATUSES),
+            ],
         ];
     }
 }
