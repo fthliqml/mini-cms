@@ -1,6 +1,5 @@
 export { getPostBySlug } from "./api/get-post-by-slug";
 export { getPosts } from "./api/get-posts";
-export { PostManagement } from "./components/post-management";
 export { PostCard } from "./components/public/post-card";
 export { PostDetail } from "./components/public/post-detail";
 export { PostList } from "./components/public/post-list";

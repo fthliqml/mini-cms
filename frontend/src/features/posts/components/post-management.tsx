@@ -41,7 +41,7 @@ type FormState =
   | { mode: "edit"; post: Post }
   | null;
 
-export function PostManagement() {
+export function AdminPostManagement() {
   const currentUser = useAuthStore((state) => state.user);
   const { endSession } = useAuthSession();
   const [page, setPage] = useState(1);
@@ -51,10 +51,10 @@ export function PostManagement() {
   const [form, setForm] = useState<FormState>(null);
   const [deletingPost, setDeletingPost] = useState<Post | null>(null);
   const deferredSearch = useDeferredValue(search.trim());
-  const canManagePosts = Boolean(currentUser);
+  const canManagePosts = currentUser?.role === "admin";
   const categoriesQuery = useCategoryOptionsQuery(canManagePosts);
   const postsQuery = useManagedPostsQuery(
-    currentUser
+    canManagePosts && currentUser
       ? { userId: currentUser.id, role: currentUser.role }
       : null,
     {
@@ -77,8 +77,6 @@ export function PostManagement() {
 
   const posts = postsQuery.data?.items ?? [];
   const pagination = postsQuery.data?.pagination;
-  const role = currentUser?.role;
-
   const handleDeleted = () => {
     const shouldMoveToPreviousPage = posts.length === 1 && page > 1;
     setDeletingPost(null);
@@ -88,7 +86,7 @@ export function PostManagement() {
     }
   };
 
-  if (!currentUser || !role) {
+  if (!currentUser || currentUser.role !== "admin") {
     return null;
   }
 
@@ -107,9 +105,7 @@ export function PostManagement() {
               Posts
             </h1>
             <p className="mt-2 text-sm text-slate-500">
-              {role === "admin"
-                ? "Manage every article, owner, category, and publishing state."
-                : "Draft, review, and publish articles in your own workspace."}
+              Manage every article, owner, category, and publishing state.
             </p>
           </div>
           <Button
@@ -383,7 +379,7 @@ export function PostManagement() {
           key={form.mode === "edit" ? form.post.id : "create"}
           mode={form.mode}
           post={form.mode === "edit" ? form.post : undefined}
-          role={role}
+          role="admin"
           currentUserId={currentUser.id}
           onClose={() => setForm(null)}
           onSaved={() => setForm(null)}
