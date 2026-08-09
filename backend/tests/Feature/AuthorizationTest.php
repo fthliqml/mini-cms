@@ -44,6 +44,7 @@ class AuthorizationTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'data');
         $response->assertJsonPath('data.0.title', 'Published Post');
+        $response->assertJsonMissingPath('data.0.author.email');
     }
 
     public function test_author_cannot_update_other_authors_post(): void
