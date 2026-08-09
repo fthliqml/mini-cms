@@ -15,36 +15,31 @@ class CategorySeeder extends Seeder
     {
         $categories = [
             [
-                "name" => "Technology",
-                "description" =>
-                    "Latest trends and innovations in the tech world",
+                'name' => 'Technology',
+                'description' => 'Latest trends and innovations in the tech world',
             ],
             [
-                "name" => "Programming",
-                "description" =>
-                    "Tutorials, tips, and best practices for developers",
+                'name' => 'Programming',
+                'description' => 'Tutorials, tips, and best practices for developers',
             ],
             [
-                "name" => "Design",
-                "description" =>
-                    "UI/UX design principles, tools, and inspiration",
+                'name' => 'Design',
+                'description' => 'UI/UX design principles, tools, and inspiration',
             ],
             [
-                "name" => "DevOps",
-                "description" =>
-                    "CI/CD, cloud infrastructure, and deployment strategies",
+                'name' => 'DevOps',
+                'description' => 'CI/CD, cloud infrastructure, and deployment strategies',
             ],
             [
-                "name" => "Career",
-                "description" =>
-                    "Career growth, job tips, and industry insights",
+                'name' => 'Career',
+                'description' => 'Career growth, job tips, and industry insights',
             ],
         ];
 
         foreach ($categories as $category) {
             Category::create([
                 ...$category,
-                "slug" => Str::slug($category["name"], "-"),
+                'slug' => Str::slug($category['name'], '-'),
             ]);
         }
     }
