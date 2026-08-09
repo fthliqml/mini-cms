@@ -23,7 +23,7 @@ import {
 import { logoutUser } from "@/features/auth/api/logout";
 import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
 import type { AuthUser } from "@/features/auth/types/auth";
-import { getDashboardNavigation } from "../config/navigation";
+import { adminDashboardNavigation } from "../config/navigation";
 
 interface DashboardSidebarProps {
   user: AuthUser;
@@ -34,7 +34,6 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
   const router = useRouter();
   const { endSession } = useAuthSession();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const navigation = getDashboardNavigation(user.role);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -55,7 +54,7 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
     <Sidebar collapsible="icon">
       <SidebarHeader className="px-3 py-4 group-data-[collapsible=icon]:p-2">
         <Link
-          href={`/dashboard/${user.role}/posts`}
+          href="/dashboard/admin/posts"
           className="flex min-w-0 items-center gap-3 rounded-lg px-1 outline-none ring-sidebar-ring transition-opacity hover:opacity-90 focus-visible:ring-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
           <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground shadow-sm group-data-[collapsible=icon]:size-8">
@@ -79,7 +78,7 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigation.map((item) => {
+              {adminDashboardNavigation.map((item) => {
                 const isActive = pathname.startsWith(item.href);
 
                 return (

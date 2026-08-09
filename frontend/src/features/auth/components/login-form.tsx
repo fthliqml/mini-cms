@@ -71,7 +71,7 @@ export function LoginForm() {
       if (response.data.role === "admin") {
         router.push("/dashboard/admin/posts");
       } else {
-        router.push("/dashboard/author/posts");
+        router.push("/author/posts");
       }
 
       router.refresh();

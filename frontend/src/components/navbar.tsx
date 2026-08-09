@@ -1,6 +1,14 @@
 "use client";
 
-import { Layers, LayoutDashboard, Loader2, LogIn, LogOut } from "lucide-react";
+import {
+  FilePenLine,
+  Layers,
+  LayoutDashboard,
+  Loader2,
+  LogIn,
+  LogOut,
+  Plus,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -31,11 +39,6 @@ export function Navbar() {
       router.refresh();
     }
   };
-
-  const dashboardHref =
-    user?.role === "admin"
-      ? "/dashboard/admin/posts"
-      : "/dashboard/author/posts";
 
   return (
     <nav className="sticky top-0 z-50 border-b border-slate-900/8 bg-[#f3f5fa]/90 backdrop-blur-xl">
@@ -93,14 +96,41 @@ export function Navbar() {
 
         {status === "authenticated" && user ? (
           <div className="flex items-center gap-2">
-            <Link
-              href={dashboardHref}
-              className={buttonVariants({ variant: "ghost", size: "sm" })}
-            >
-              <LayoutDashboard className="mr-1.5 h-3.5 w-3.5" />
-              <span className="hidden sm:inline">{user.name}</span>
-              <span className="sm:hidden">Dashboard</span>
-            </Link>
+            {user.role === "admin" ? (
+              <Link
+                href="/dashboard/admin/posts"
+                className={buttonVariants({ variant: "ghost", size: "sm" })}
+              >
+                <LayoutDashboard className="size-3.5 sm:mr-1.5" />
+                <span className="hidden sm:inline">{user.name}</span>
+                <span className="sr-only sm:hidden">Admin dashboard</span>
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/author/posts"
+                  className={buttonVariants({
+                    variant: "ghost",
+                    size: "sm",
+                  })}
+                >
+                  <FilePenLine className="size-3.5 sm:mr-1.5" />
+                  <span className="hidden sm:inline">My posts</span>
+                  <span className="sr-only sm:hidden">My posts</span>
+                </Link>
+                <Link
+                  href="/author/posts/new"
+                  className={buttonVariants({
+                    size: "sm",
+                    className: "bg-blue-600 hover:bg-blue-700",
+                  })}
+                >
+                  <Plus className="size-3.5 sm:mr-1" />
+                  <span className="hidden sm:inline">New post</span>
+                  <span className="sr-only sm:hidden">New post</span>
+                </Link>
+              </>
+            )}
             <Button
               type="button"
               variant="outline"

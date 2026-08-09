@@ -1,6 +1,6 @@
 # Mini CMS
 
-A lightweight content management system with a Laravel API and a Next.js App Router frontend. Mini CMS includes a public editorial blog, role-aware dashboards, Markdown publishing, and cover image management.
+A lightweight content management system with a Laravel API and a Next.js App Router frontend. Mini CMS includes a public editorial blog, an admin dashboard, a focused author workspace, Markdown publishing, and cover image management.
 
 ## Tech Stack
 
@@ -113,7 +113,7 @@ After both servers are running:
 1. Open [http://localhost:3000](http://localhost:3000) and confirm that published posts appear.
 2. Sign in with `admin@example.com` and `password`.
 3. Open **Posts**, create a draft, and upload a JPEG, PNG, or WebP cover.
-4. Sign out and sign in as an author to confirm that authors only see their own posts.
+4. Sign out and sign in as an author to open the public-style author desk and confirm that only owned posts are listed.
 
 Run the automated checks when needed:
 
@@ -187,7 +187,7 @@ erDiagram
 
 ## Troubleshooting
 
-- **Login succeeds but the dashboard returns to the login page:** open both applications through `localhost`, clear old cookies, and verify `FRONTEND_URL`, `SESSION_DOMAIN`, and `SANCTUM_STATEFUL_DOMAINS`.
+- **Login succeeds but the expected workspace does not open:** use `localhost` for both applications, clear old cookies, and verify `FRONTEND_URL`, `SESSION_DOMAIN`, and `SANCTUM_STATEFUL_DOMAINS`.
 - **Uploaded cover returns 404:** run `php artisan storage:link` inside `backend` and confirm `APP_URL=http://localhost:8000`.
 - **Database setup fails:** confirm MySQL is running, verify the credentials in `backend/.env`, then rerun `php artisan migrate --seed` and accept Laravel's database creation prompt.
 - **Seed command reports duplicate users:** seeding is intended for a fresh database. Use `php artisan migrate:fresh --seed` only when it is safe to erase local development data.

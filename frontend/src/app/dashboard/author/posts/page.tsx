@@ -1,5 +1,5 @@
-import { PostManagement } from "@/features/posts/components/post-management";
+import { redirect } from "next/navigation";
 
 export default function AuthorPostsPage() {
-  return <PostManagement />;
+  redirect("/author/posts");
 }
